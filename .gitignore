@@ -2,3 +2,7 @@
 *.dSYM
 audio/
 example.*
+
+mtoh
+ftoh
+ftom
