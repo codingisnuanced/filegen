@@ -2,7 +2,11 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "jvutils.h"
+#include "log.h"
+
+#if defined(__APPLE__) && defined(__MACH__)
 #include <malloc/malloc.h>
+#endif
 
 //
 // STRINGS & COMPARISONS
@@ -96,7 +100,7 @@ char* randomURLString(int length) {
 	char *name = malloc(length+1);
 	name[0] = '\0';
 	for(i = 0; i < length; ++i) {
-		name[i] = validChars[arc4random_uniform(68)];
+		name[i] = validChars[rand() / (RAND_MAX / 68)];
 	}
 	name[length] = '\0';
 	return name;
@@ -104,8 +108,9 @@ char* randomURLString(int length) {
 
 
 //
-// FILES & DIRECTORIES FUNCTIONS
+// FILES & DIRECTORIES
 //
+
 // returns 0  on success
 int createDir(const char *path, mode_t mode) {
 	struct stat st = {0};
@@ -161,27 +166,6 @@ char* getAbsoluteWorkingDirectory() {
 	return currdir;
 }
 
-// creartes directories with random names
-// returns pointer to pointer of directories created
-// char** createRandomDirectories(char *folder, int number) {
-// 	int i;
-// 	char *randomString;
-// 	char **directories = malloc(number * sizeof(char*));
-// 	char *finalPath;
-// 	for(i = 0; i < number; ++i) {
-// 		finalPath = malloc(strlen(folder) + 7);
-// 		finalPath[0] = '\0';
-// 		randomString = randomURLString(5);
-// 		(void)strncat(finalPath, folder, strlen(folder));
-// 		(void)strncat(finalPath, "/", 1);
-// 		(void)strncat(finalPath, randomString, strlen(randomString));
-// 		finalPath[strlen(folder) + 6] = '\0';
-// 		directories[i] = finalPath;
-// 		free(randomString);
-// 	}
-// 	return directories;
-// }
-
 // creates directories with random names
 // writes folder paths on a line to file
 // returns 0 on success
@@ -189,13 +173,12 @@ int createRandomDirectories(char *folder, int number, char* fileStr) {
 	int i;
 	char *randomString;
 	char *finalPath;
-	// char *currdir = getAbsoluteWorkingDirectory();
 	FILE *file = fopen(fileStr, "w");
 
 	if(!isDirectory(folder)) {
-		printf("%s is not a directory. Creating directory...\n", folder);
+		Log("\n%s is not a directory. Creating directory...\n\n", folder);
 		if(createDir(folder, 0700) != 0) {
-			fprintf(stderr, "Error creating directory: %s\n", folder);
+			LogErr("Error creating directory: %s\n", folder);
 			return -1;
 		}
 	}
@@ -205,15 +188,14 @@ int createRandomDirectories(char *folder, int number, char* fileStr) {
 		randomString = randomURLString(7);
 		finalPath = malloc(strlen(folder) + strlen(randomString) + 2);
 		finalPath[0] = '\0';
-		// (void)strncat(finalPath, currdir, strlen(currdir));
-		// (void)strncat(finalPath, "/", 1);
 		(void)strncat(finalPath, folder, strlen(folder));
 		(void)strncat(finalPath, "/", 1);
 		(void)strncat(finalPath, randomString, strlen(randomString));
 		finalPath[strlen(folder) + strlen(randomString) + 1] = '\0';
 
+		Log("Creating directory at %s\n", finalPath);
 		if(createDir(finalPath, 0700) != 0) {
-			fprintf(stderr, "Error creating directory: %s\n", finalPath);
+			LogErr("Error creating directory: %s\n", finalPath);
 		} else {
 			fprintf(file, "%s\n", finalPath);
 		}
@@ -221,20 +203,9 @@ int createRandomDirectories(char *folder, int number, char* fileStr) {
 		free(randomString);
 		free(finalPath);
 	}
-	// free(currdir);
+	Log("\n");
 	fclose(file);
 
 	return 0;
 }
-
-// void releaseDirectories(char **directories) {
-// 	size_t ptrSize = malloc_size(directories);
-// 	int arrLength = ptrSize/sizeof(directories[0]);
-// 	int i;
-// 	for(i = 0; i < arrLength; ++i) {
-// 		free(directories[i]);
-// 	}
-
-// 	free(directories);
-// }
 
