@@ -1,13 +1,21 @@
-// log.h; the header file which defines Log(); and LogErr();
+// log.h by Joseph Ayo-Vaughan; logging utility
 
-// all Log(); messages will be appended too this file
+// all Log() and LogErr messages will be appended too this file
 #define LOGFILE "ftoh.log"
 
 // keeps track of whether the log file is created or not
 extern int LogCreated;
 
-// logs a message to LOGFILE
+/**
+ ** logs a message to LOGFILE
+ ** param format: format of message
+ ** param ...: 
+ **/
 void Log(char *format, ...);
 
-// logs an error message to LOGFILE
+/**
+ ** logs an error message to LOGFILE
+ ** param format: format of message
+ ** param ...: 
+ **/
 void LogErr(char *format, ...);

@@ -1,7 +1,8 @@
-// log.c
+// log.c by Joseph Ayo-Vaughan
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <stdarg.h>
 #include "log.h"
 

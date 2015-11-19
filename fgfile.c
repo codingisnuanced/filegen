@@ -1,7 +1,10 @@
+// fgfile.c by Joseph Ayo-Vaughan
+
 #include <dirent.h>
+#include <stdio.h>
 #include "fgfile.h"
+#include "jvutils.h"
 #include "log.h"
-#include "jvutils.c" // BAD!!
 
 #if defined(__APPLE__) && defined(__MACH__)
 #include <malloc/malloc.h>
@@ -14,14 +17,14 @@
 #define FG_TESTING 0
 
 #ifdef __gnu_linux__
-char *strdup(const char *str) {
-    int n = strlen(str) + 1;
-    char *dup = malloc(n);
-    if(dup)
+char *strdup(const char *source) {
+    int size = strlen(source) + 1;
+    char *duplicate = malloc(size);
+    if(duplicate)
     {
-        strcpy(dup, str);
+        strcpy(duplicate, source);
     }
-    return dup;
+    return duplicate;
 }
 #endif
 
@@ -29,110 +32,107 @@ FGFile* createFile(char *fileName, char *resourcePath) {
 	FGFile *newFile = (FGFile*)malloc(sizeof(FGFile));
 	newFile->fileName = strdup(fileName);
 	stringToLowercase(fileName);
-	replaceSpaces(fileName, '-');
-	newFile->legalName = strdup(fileName);
+	strreplace(fileName, ' ', '-');
+	newFile->niceName = strdup(fileName);
 	newFile->resourcePath = strdup(resourcePath);
-	newFile->filePath = NULL;
+	newFile->relativePath = NULL;
+	newFile->absolutePath = NULL;
 
 	return newFile;
 }
 
-void randomizeFiles(FGFile **fileArr) {
-	int rn;
-	size_t fileArrSize = 0;
+void randomizeFGFiles(FGFile **fileArray) {
+	int randNumber;
+	size_t fileArraySize = 0;
 #if defined(__APPLE__) && defined(__MACH__)
-	fileArrSize = malloc_size(fileArr);
+	fileArraySize = malloc_size(fileArray);
 #endif
 
 #ifdef __gnu_linux__
-	fileArrSize = malloc_usable_size(fileArr);
+	fileArraySize = malloc_usable_size(fileArray);
 #endif
-	int arrLength = fileArrSize/sizeof(fileArr[0]);
+	int arrayLength = fileArraySize/sizeof(fileArray[0]);
 	int i;
-	for(i = 0; i < arrLength; ++i) {
-		rn = rand() / (RAND_MAX / arrLength);
-		FGFile *temp = fileArr[rn];
-		fileArr[rn] = fileArr[i];
-		fileArr[i] = temp;
+	for(i = 0; i < arrayLength; ++i) {
+		randNumber = randomNumber(arrayLength);
+		FGFile *temp = fileArray[randNumber];
+		fileArray[randNumber] = fileArray[i];
+		fileArray[i] = temp;
 	}
 }
 
-void printFilesForward(FGFile **fileArr) {
+void listFGFiles(FGFile **fileArray) {
 	FGFile *file;
-	size_t fileArrSize = 0;
+	size_t fileArraySize = 0;
 #if defined(__APPLE__) && defined(__MACH__)
-	fileArrSize = malloc_size(fileArr);
+	fileArraySize = malloc_size(fileArray);
 #endif
 
 #ifdef __gnu_linux__
-	fileArrSize = malloc_usable_size(fileArr);
+	fileArraySize = malloc_usable_size(fileArray);
 #endif
-	int arrLength = fileArrSize/sizeof(fileArr[0]);
+	int arrayLength = fileArraySize/sizeof(fileArray[0]);
 	int i;
-	for(i = 0; i < arrLength; ++i) {
-		file = fileArr[i];
-		printf("FGFILE: %s\n", file->legalName);
+	for(i = 0; i < arrayLength; ++i) {
+		file = fileArray[i];
+		printf("FGFile: %s\n", file->niceName);
 	}
 	printf("\n");
 }
 
-void releaseFiles(FGFile **fileArr) {
+void releaseFGFiles(FGFile **fileArray) {
 	FGFile *file;
-	size_t fileArrSize = 0;
+	size_t fileArraySize = 0;
 #if defined(__APPLE__) && defined(__MACH__)
-	fileArrSize = malloc_size(fileArr);
+	fileArraySize = malloc_size(fileArray);
 #endif
 
 #ifdef __gnu_linux__
-	fileArrSize = malloc_usable_size(fileArr);
+	fileArraySize = malloc_usable_size(fileArray);
 #endif
-	int arrLength = fileArrSize/sizeof(fileArr[0]);
-	for(int i = 0; i < arrLength; ++i) {
-		file = fileArr[i];
+	int arrayLength = fileArraySize/sizeof(fileArray[0]);
+
+	int i;
+	for(i = 0; i < arrayLength; ++i) {
+		file = fileArray[i];
 		if(file) {
 			if(file->fileName) free(file->fileName);
-			if(file->legalName) free(file->legalName);
+			if(file->niceName) free(file->niceName);
 			if(file->resourcePath) free(file->resourcePath);
-			if(file->filePath) free(file->filePath);
+			if(file->relativePath) free(file->relativePath);
+			if(file->absolutePath) free(file->absolutePath);
 			free(file);
 		}
 	}
 }
 
-// returns 0 on success
-int initFilesInDir(FGFile **fileArr, size_t length, char *folder) {
-	char *buf;
-	char *currdir;
+int generateFGFilesFromResources(FGFile **fileArray, size_t length, char *folder, int includeHidden) {
+	char *currentDirectory;
 	int counter = 0;
 	int hasSlash = 0;
 
-	currdir = getAbsoluteWorkingDirectory();
+	currentDirectory = getAbsoluteWorkingDirectory();
 
-	char audioDir[strlen(currdir) + strlen(folder) + 2];
+	char resourceDirectory[strlen(currentDirectory) + strlen(folder) + 2];
 
 	if(folder[strlen(folder) - 1] == '/') hasSlash = 1;
 
-	audioDir[0] = '\0';
-	(void)strncat(audioDir, currdir, strlen(currdir));
-	(void)strncat(audioDir, "/", 1);
-	(void)strncat(audioDir, folder, strlen(folder));
-	audioDir[strlen(currdir) + strlen(folder) + 1] = '\0';
+	resourceDirectory[0] = '\0';
+	(void)strncat(resourceDirectory, currentDirectory, strlen(currentDirectory));
+	(void)strncat(resourceDirectory, "/", 1);
+	(void)strncat(resourceDirectory, folder, strlen(folder));
+	resourceDirectory[strlen(currentDirectory) + strlen(folder) + 1] = '\0';
 
-	Log("Using files from %s\n\n", audioDir);
+	Log("Using files from %s\n\n", resourceDirectory);
 
-	free(currdir);
+	free(currentDirectory);
 
-	DIR *dir;
+	DIR *directory;
 	struct dirent *ent;
-	if((dir = opendir(audioDir)) != NULL) {
+	if((directory = opendir(resourceDirectory)) != NULL) {
 		int i = 0;
-		while(((ent = readdir(dir)) != NULL) && (i < length)) {
-			// check if item is a file that doesn't
-			// begin with a period(.);
-			// create FGFile with it's resource path
-			// put FGFile objects into array
-			if(ent->d_name[0] != '.') {
-				// construct full path of file
+		while(((ent = readdir(directory)) != NULL) && (i < length)) {
+			if(includeHidden) {
 				char fullPath[strlen(folder) + strlen(ent->d_name) - hasSlash + 2];
 				fullPath[0] = '\0';
 				(void)strncat(fullPath, folder, strlen(folder));
@@ -142,19 +142,35 @@ int initFilesInDir(FGFile **fileArr, size_t length, char *folder) {
 
 				if(isRegularFile(fullPath)) {
 					counter++;
-					fileArr[i] = createFile(ent->d_name, fullPath);
+					fileArray[i] = createFile(ent->d_name, fullPath);
 					Log("Found file at: %s\n", fullPath);
 				}
 				++i;
+			} else {
+				if(ent->d_name[0] != '.') {
+					char fullPath[strlen(folder) + strlen(ent->d_name) - hasSlash + 2];
+					fullPath[0] = '\0';
+					(void)strncat(fullPath, folder, strlen(folder));
+					if(!hasSlash) (void)strncat(fullPath, "/", 1);
+					(void)strncat(fullPath, ent->d_name, strlen(ent->d_name));
+					fullPath[strlen(folder) + strlen(ent->d_name) - hasSlash + 1] = '\0';
+
+					if(isRegularFile(fullPath)) {
+						counter++;
+						fileArray[i] = createFile(ent->d_name, fullPath);
+						Log("Found file at: %s\n", fullPath);
+					}
+					++i;
+				}
 			}
 		}
 
 		Log("\nFound %i files.\n", counter);
-		closedir(dir);
-		return 1;
+		closedir(directory);
+		return 0;
 	} else {
 		perror("");
-		LogErr("\nCould not open directory %s\n", audioDir);
-		return 0;
+		LogErr("\nCould not open directory %s\n", resourceDirectory);
+		return 1;
 	}
 }

@@ -1,6 +1,13 @@
+// jvutils.c
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 #include <limits.h>
 #include <sys/types.h>
-#include <sys/stat.h>
+#include <unistd.h>
+#include <time.h>
 #include "jvutils.h"
 #include "log.h"
 
@@ -9,7 +16,41 @@
 #endif
 
 //
-// STRINGS & COMPARISONS
+// NUMBERS
+//
+
+int randomNumberWithUpperAndLower(int lowerBound, int upperBound) {
+	int randomNumber = lowerBound + rand() / (RAND_MAX / upperBound);
+
+	return randomNumber;
+}
+
+int randomNumber(int upperBound) {
+	int randomNumber = rand() / (RAND_MAX / upperBound);
+
+	return randomNumber;
+}
+
+
+//
+// TIME
+//
+
+unsigned time_seed() {
+	time_t now = time(0);
+	unsigned char *p = (unsigned char *)&now;
+	unsigned seed =0;
+
+	size_t i;
+	for(i = 0; i < sizeof now; i++) {
+		seed = seed * (UCHAR_MAX + 2U) + p[i];
+	}
+
+	return seed;
+}
+
+//
+// STRINGS
 //
 
 int alphabetLookup(int c) {
@@ -76,20 +117,30 @@ int compareStrings(const char *a, const char *b) {
 	return (ax != bx) ? !bx - !ax : weight;
 }
 
+void strreplace(char *source, char chr, char replacement) {
+	int i = 0;
+	while(source[i] != '\0') {
+		if(source[i] == chr) {
+			source[i] = replacement;
+		}
+		i++;
+	}
+}
+
 void replaceSpaces(char *string, char replacement) {
-	for(int i = 0; i <= strlen(string); ++i) {
+	int i;
+	for(i = 0; i <= strlen(string); ++i) {
 		if(string[i] == ' ') string[i] = replacement;
 	}
 }
 
-void stringToLowercase(char *string) {
-	for(int i = 0; i <= strlen(string); ++i) {
-		if(isupper(string[i])) string[i] = tolower(string[i]);
+void stringToLowercase(char *source) {
+	int i;
+	for(i = 0; i <= strlen(source); ++i) {
+		if(isupper(source[i])) source[i] = tolower(source[i]);
 	}
 }
 
-
-// length: number of characters per string
 char* randomURLString(int length) {
 	//73 chars
 	// const char *validChars = "$-_.+!*'(),1234567890aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ";
@@ -100,7 +151,7 @@ char* randomURLString(int length) {
 	char *name = malloc(length+1);
 	name[0] = '\0';
 	for(i = 0; i < length; ++i) {
-		name[i] = validChars[rand() / (RAND_MAX / 68)];
+		name[i] = validChars[randomNumber(68)];
 	}
 	name[length] = '\0';
 	return name;
@@ -144,10 +195,10 @@ int isRegularFile(const char *path) {
 }
 
 char* getAbsoluteWorkingDirectory() {
-	char *buf;
+	char *buffer;
 	long path_max;
 	size_t path_size;
-	char *currdir;
+	char *currentDirectory;
 
 	path_max = pathconf(".", _PC_PATH_MAX);
 
@@ -159,39 +210,36 @@ char* getAbsoluteWorkingDirectory() {
 		path_size = path_max;
 	}
 
-	buf = malloc(path_size);
+	buffer = malloc(path_size);
 
-	currdir = getcwd(buf, path_size);
+	currentDirectory = getcwd(buffer, path_size);
 
-	return currdir;
+	return currentDirectory;
 }
 
-// creates directories with random names
-// writes folder paths on a line to file
-// returns 0 on success
-int createRandomDirectories(char *folder, int number, char* fileStr) {
+int createRandomDirectories(char *path, int number, char* fileString) {
 	int i;
 	char *randomString;
 	char *finalPath;
-	FILE *file = fopen(fileStr, "w");
+	FILE *file = fopen(fileString, "w");
 
-	if(!isDirectory(folder)) {
-		Log("\n%s is not a directory. Creating directory...\n\n", folder);
-		if(createDir(folder, 0700) != 0) {
-			LogErr("Error creating directory: %s\n", folder);
+	if(!isDirectory(path)) {
+		Log("\n%s is not a directory. Creating directory.\n\n", path);
+		if(createDir(path, 0700) != 0) {
+			LogErr("Error creating directory: %s\n", path);
 			return -1;
 		}
 	}
 
 	if(!file) return -1;
 	for(i = 0; i < number; ++i) {
-		randomString = randomURLString(7);
-		finalPath = malloc(strlen(folder) + strlen(randomString) + 2);
+		randomString = randomURLString(randomNumberWithUpperAndLower(5, 15));
+		finalPath = malloc(strlen(path) + strlen(randomString) + 2);
 		finalPath[0] = '\0';
-		(void)strncat(finalPath, folder, strlen(folder));
+		(void)strncat(finalPath, path, strlen(path));
 		(void)strncat(finalPath, "/", 1);
 		(void)strncat(finalPath, randomString, strlen(randomString));
-		finalPath[strlen(folder) + strlen(randomString) + 1] = '\0';
+		finalPath[strlen(path) + strlen(randomString) + 1] = '\0';
 
 		Log("Creating directory at %s\n", finalPath);
 		if(createDir(finalPath, 0700) != 0) {
