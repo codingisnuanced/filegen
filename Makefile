@@ -24,19 +24,19 @@ bin:
 ##
 
 ftoh.o: bin ftoh.c ftoh.h fgfile.h log.h
-	gcc -c ftoh.c
+	gcc -g ftoh.c
 	mv ftoh.o bin/
 
 fgfile.o: bin fgfile.c fgfile.h log.h
-	gcc -c fgfile.c
+	gcc -g fgfile.c
 	mv fgfile.o bin/
 
 jvutils.o: bin jvutils.c jvutils.h log.h
-	gcc -c jvutils.c
+	gcc -g jvutils.c
 	mv jvutils.o bin/
 
 log.o: bin log.c log.h
-	gcc -c log.c
+	gcc -g log.c
 	mv log.o bin/
 
 
@@ -72,4 +72,3 @@ clean:
 reset:
 	make uninstall
 	make clean
-	make nginxclean
