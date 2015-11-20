@@ -61,7 +61,7 @@ nginx:
 ##
 
 uninstall:
-	sudo rm /usr/local/bin/ftoh
+	sudo rm -f /usr/local/bin/ftoh
 
 nginxclean:
 	sudo rm -r /usr/share/nginx/filegen/html/ /usr/share/nginx/filegen/html_dirs.txt /usr/share/nginx/filegen/html_files.txt /usr/share/nginx/filegen/index.html
