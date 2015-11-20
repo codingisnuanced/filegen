@@ -31,7 +31,6 @@ void Log(char *format, ...) {
 		}
 	} else {
 		vfprintf(file, format, args);
-		fclose(file);
 	}
 
 	if(file) fclose(file);
