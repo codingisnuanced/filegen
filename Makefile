@@ -3,10 +3,6 @@
 # Joseph Ayo-Vaughan. 2015 
 ##
 
-all:
-	make build
-	make install
-
 build: ftoh.o fgfile.o jvutils.o log.o
 	gcc bin/ftoh.o bin/fgfile.o bin/jvutils.o bin/log.o -o ftoh
 	mv ftoh bin/
@@ -14,6 +10,10 @@ build: ftoh.o fgfile.o jvutils.o log.o
 install:
 	sudo cp bin/ftoh /usr/local/bin
 	sudo chmod 755 /usr/local/bin/ftoh
+
+all:
+	make build
+	make install
 
 bin:
 	mkdir bin/
@@ -64,9 +64,11 @@ uninstall:
 	sudo rm -f /usr/local/bin/ftoh
 
 nginxclean:
-	sudo rm -r /usr/share/nginx/filegen/html/ /usr/share/nginx/filegen/html_dirs.txt /usr/share/nginx/filegen/html_files.txt /usr/share/nginx/filegen/index.html
+	sudo rm -rf /usr/share/nginx/filegen/html/ /usr/share/nginx/filegen/html_dirs.txt /usr/share/nginx/filegen/html_files.txt /usr/share/nginx/filegen/index.html
 
 clean:
-	rm -rf *.o html/ html_dirs.txt html_files.txt index.html ftoh.log bin
+	rm -rf html/ html_dirs.txt html_files.txt index.html ftoh.log bin
 
-reset: uninstall clean
+reset:
+	make uninstall
+	make clean

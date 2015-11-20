@@ -89,6 +89,8 @@ int markupFile(FGFile *fgfile, FGFile **fileArray) {
 
 	int paragraphTagOpen = 0;
 
+	Log("Marking up file %s\n", fgfile->niceName);
+
 	if((file = fopen(fgfile->relativePath, "w")) != NULL) {
 
 		fprintf(file, "%s%s%s%s\n", beginHtml, beginHead, closeHead, beginBody);
