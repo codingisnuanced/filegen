@@ -24,19 +24,19 @@ bin:
 ##
 
 ftoh.o: bin ftoh.c ftoh.h fgfile.h log.h
-	gcc -g ftoh.c
+	gcc -c ftoh.c
 	mv ftoh.o bin/
 
 fgfile.o: bin fgfile.c fgfile.h log.h
-	gcc -g fgfile.c
+	gcc -c fgfile.c
 	mv fgfile.o bin/
 
 jvutils.o: bin jvutils.c jvutils.h log.h
-	gcc -g jvutils.c
+	gcc -c jvutils.c
 	mv jvutils.o bin/
 
 log.o: bin log.c log.h
-	gcc -g log.c
+	gcc -c log.c
 	mv log.o bin/
 
 
