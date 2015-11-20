@@ -310,59 +310,13 @@ int organizeWithDirectoriesFile(FGFile **fileArray, int per, char *directoriesLi
 #endif
 	int arrayLength = fileArraySize/sizeof(fileArray[0]);
 	FILE *directoriesListFile;
-	FILE *filesListFile;
-	long path_max;
-	size_t path_size;
 
 	if(saveFilesWithDirectoriesFile(fileArray, per, directoriesListString, filesListString) != 0) return -1;
 
-	filesListFile = fopen(filesListString, "r");
-
-	if(!filesListFile) return -1;
-
-	path_max = pathconf(".", _PC_PATH_MAX);
-
-	if(path_max == -1) {
-		path_size = 1024;
-	} else if(path_max > 10240) {
-		path_size = 10240;
-	} else {
-		path_size = path_max;
-	}
-
-	char line[path_size];
-
 	int i;
-	int lengthTracker = arrayLength;
-	int positionTracker = 0;
-	while(fgets(line, sizeof(line), filesListFile)) {
-		strtok(line, "\n"); // remove newline character;
-		if(lengthTracker < per) {
-			for(i = 0; i < lengthTracker; ++i) {
-				if(markupFile(fileArray[positionTracker + i], fileArray) != 0) LogErr("Error marking up html file.\n");
-			}
-			positionTracker += lengthTracker;
-			lengthTracker = 0;
-			break;
-		} else {
-			for(i = 0; i < per; ++i) {
-				if(markupFile(fileArray[positionTracker + i], fileArray) != 0) LogErr("Error marking up html file.\n");
-			}
-			lengthTracker-=per;
-			positionTracker += per;
-
-		}
+	for(i = 0; i < arrayLength; ++i) {
+		if(markupFile(fileArray[i], fileArray) != 0) LogErr("Error marking up html file.\n");
 	}
-
-	if(lengthTracker != 0) { // if there are still files left
-		for(i = 0; i < lengthTracker; ++i) {
-			if(markupFile(fileArray[positionTracker + i], fileArray) != 0) LogErr("Error marking up html file.\n");
-		}
-		positionTracker += lengthTracker;
-		lengthTracker = 0;
-	}
-
-	fclose(filesListFile);
 
 	createPortalFromFilesList(filesListString);
 

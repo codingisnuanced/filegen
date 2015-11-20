@@ -28,8 +28,8 @@ log.o: bin log.c log.h
 	gcc -c log.c
 	mv log.o bin/
 
-launch-default:
-	ftoh -d audio/ -f 100 -n 10 -p 10
+default:
+	ftoh -d audio/ -f 100 -n 10 -p 10 -rv
 
 valgrind:
 	gcc -g ftoh.c fgfile.c jvutils.c log.c -o ftoh && valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ftoh -d audio/ -f 100 -n 10 -p 10
@@ -42,4 +42,5 @@ clean-nginx:
 
 nginx: clean-nginx ftoh
 	sudo mkdir /usr/share/nginx/filegen/
-	sudo cp --recursive html/ html_dirs.txt html_files.txt index.html /usr/share/nginx/filegen/
+	sudo cp --recursive html/ index.html /usr/share/nginx/filegen/
+	sudo chmod 755 /usr/share/nginx/filegen/html
