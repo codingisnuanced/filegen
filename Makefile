@@ -69,6 +69,4 @@ nginxclean:
 clean:
 	rm -rf *.o html/ html_dirs.txt html_files.txt index.html ftoh.log bin
 
-reset:
-	make uninstall
-	make clean
+reset: uninstall clean
