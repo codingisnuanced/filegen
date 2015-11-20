@@ -128,36 +128,36 @@ int generateFGFilesFromResources(FGFile **fileArray, size_t length, char *folder
 	free(currentDirectory);
 
 	DIR *directory;
-	struct dirent *ent;
+	struct dirent *entry;
 	if((directory = opendir(resourceDirectory)) != NULL) {
 		int i = 0;
-		while(((ent = readdir(directory)) != NULL) && (i < length)) {
+		while(((entry = readdir(directory)) != NULL) && (i < length)) {
 			if(includeHidden) {
-				char fullPath[strlen(folder) + strlen(ent->d_name) - hasSlash + 2];
+				char fullPath[strlen(folder) + strlen(entry->d_name) - hasSlash + 2];
 				fullPath[0] = '\0';
 				(void)strncat(fullPath, folder, strlen(folder));
 				if(!hasSlash) (void)strncat(fullPath, "/", 1);
-				(void)strncat(fullPath, ent->d_name, strlen(ent->d_name));
-				fullPath[strlen(folder) + strlen(ent->d_name) - hasSlash + 1] = '\0';
+				(void)strncat(fullPath, entry->d_name, strlen(entry->d_name));
+				fullPath[strlen(folder) + strlen(entry->d_name) - hasSlash + 1] = '\0';
 
 				if(isRegularFile(fullPath)) {
 					counter++;
-					fileArray[i] = createFile(ent->d_name, fullPath);
+					fileArray[i] = createFile(entry->d_name, fullPath);
 					Log("Found file at: %s\n", fullPath);
 				}
 				++i;
 			} else {
-				if(ent->d_name[0] != '.') {
-					char fullPath[strlen(folder) + strlen(ent->d_name) - hasSlash + 2];
+				if(entry->d_name[0] != '.') {
+					char fullPath[strlen(folder) + strlen(entry->d_name) - hasSlash + 2];
 					fullPath[0] = '\0';
 					(void)strncat(fullPath, folder, strlen(folder));
 					if(!hasSlash) (void)strncat(fullPath, "/", 1);
-					(void)strncat(fullPath, ent->d_name, strlen(ent->d_name));
-					fullPath[strlen(folder) + strlen(ent->d_name) - hasSlash + 1] = '\0';
+					(void)strncat(fullPath, entry->d_name, strlen(entry->d_name));
+					fullPath[strlen(folder) + strlen(entry->d_name) - hasSlash + 1] = '\0';
 
 					if(isRegularFile(fullPath)) {
 						counter++;
-						fileArray[i] = createFile(ent->d_name, fullPath);
+						fileArray[i] = createFile(entry->d_name, fullPath);
 						Log("Found file at: %s\n", fullPath);
 					}
 					++i;
