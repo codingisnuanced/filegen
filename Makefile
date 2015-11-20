@@ -1,26 +1,41 @@
-ftoh.o: ftoh.c ftoh.h fgfile.h log.h
+build: ftoh.o fgfile.o jvutils.o log.o
+	gcc bin/ftoh.o bin/fgfile.o bin/jvutils.o bin/log.o -o ftoh
+	mv ftoh bin/
+
+install:
+	sudo cp bin/ftoh /usr/local/bin
+	sudo chmod 755 /usr/local/bin/ftoh
+
+uninstall:
+	sudo rm /usr/local/bin/ftoh
+
+bin:
+	mkdir bin/
+
+ftoh.o: bin ftoh.c ftoh.h fgfile.h log.h
 	gcc -c ftoh.c
+	mv ftoh.o bin/
 
-fgfile.o: fgfile.c fgfile.h log.h
+fgfile.o: bin fgfile.c fgfile.h log.h
 	gcc -c fgfile.c
+	mv fgfile.o bin/
 
-jvutils.o: jvutils.c jvutils.h log.h
+jvutils.o: bin jvutils.c jvutils.h log.h
 	gcc -c jvutils.c
+	mv jvutils.o bin/
 
-log.o: log.c log.h
+log.o: bin log.c log.h
 	gcc -c log.c
-
-ftoh: ftoh.o fgfile.o jvutils.o log.o
-	gcc ftoh.o fgfile.o jvutils.o log.o -o ftoh
+	mv log.o bin/
 
 launch-default:
-	./ftoh -d audio/ -f 100 -n 10 -p 10
+	ftoh -d audio/ -f 100 -n 10 -p 10
 
 valgrind:
-	gcc -g ftoh.c fgfile.c jvutils.c log.c -o ftoh && valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./ftoh -d audio/ -f 100 -n 10 -p 10
+	gcc -g ftoh.c fgfile.c jvutils.c log.c -o ftoh && valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ftoh -d audio/ -f 100 -n 10 -p 10
 
 clean:
-	rm -rf *.o html/ html_dirs.txt html_files.txt index.html ftoh.log
+	rm -rf *.o html/ html_dirs.txt html_files.txt index.html ftoh.log bin
 
 clean-nginx:
 	sudo rm -r /usr/share/nginx/filegen/html/ /usr/share/nginx/filegen/html_dirs.txt /usr/share/nginx/filegen/html_files.txt /usr/share/nginx/filegen/index.html
