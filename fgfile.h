@@ -53,4 +53,4 @@ void randomizeFGFiles(FGFile **fileArray);
  * free memory associated with all files in a FGFile array and then the array
  * parameter fileArray: the file array to free
  **/
-void releaseFGFiles(FGFile **ptr);
+void releaseFGFiles(FGFile **fileArray);
