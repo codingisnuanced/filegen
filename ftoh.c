@@ -18,7 +18,6 @@
 #include <malloc.h>
 #endif
 
-// #define FG_SIZE 100
 #define TESTING 0
 
 
@@ -209,7 +208,8 @@ int createPortalFromFilesList(char *filesListString) {
 }
 
 int saveFilesWithDirectoriesFile(FGFile **fileArray, int per, char *directoriesListString, char *filesListString) {
-		size_t fileArraySize;
+	size_t fileArraySize;
+
 #if defined(__APPLE__) && defined(__MACH__)
 	fileArraySize = malloc_size(fileArray);
 #endif
@@ -281,20 +281,6 @@ int saveFilesWithDirectoriesFile(FGFile **fileArray, int per, char *directoriesL
 		}
 	}
 
-	if(lengthTracker != 0) { // if there are still files left
-		for(i = 0; i < lengthTracker; ++i) {
-			// Log("%s will go in %s\n", fileArray[positionTracker + i]->niceName, line);
-			if((filePath = createHtmlFile(fileArray[positionTracker + i]->niceName, line)) == NULL) {
-				LogErr("Error creating html file.\n");
-			} else {
-				fileArray[positionTracker + i]->relativePath = filePath;
-				fprintf(filesListFile, "%s\n", filePath);
-			}
-		}
-		positionTracker += lengthTracker;
-		lengthTracker = 0;
-	}
-
 	fclose(directoriesListFile);
 	fclose(filesListFile);
 
@@ -302,7 +288,8 @@ int saveFilesWithDirectoriesFile(FGFile **fileArray, int per, char *directoriesL
 }
 
 int organizeWithDirectoriesFile(FGFile **fileArray, int per, char *directoriesListString, char *filesListString) {
-		size_t fileArraySize;
+	size_t fileArraySize;
+
 #if defined(__APPLE__) && defined(__MACH__)
 	fileArraySize = malloc_size(fileArray);
 #endif
@@ -421,6 +408,8 @@ int main(int argc, char *argv[]) {
 	if(createRandomDirectories("html", numberOfFolders, "html_dirs.txt") == 0) {
 		organizeWithDirectoriesFile(fileArray, filesPerFolder, "html_dirs.txt", "html_files.txt");
 	}
+
+	if(LogCount) printf("%i errors occured. Look at ftoh.log for more information.\n", LogCount);
 
 	releaseFGFiles(fileArray);
 	free(fileArray);

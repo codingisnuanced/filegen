@@ -10,6 +10,7 @@
 #define FALSE 0
 
 int LogCreated = FALSE;
+int LogCount = 0;
 
 void Log(char *format, ...) {
 	va_list args;
@@ -34,6 +35,7 @@ void Log(char *format, ...) {
 	}
 
 	if(file) fclose(file);
+	
 	va_end(args);
 }
 
@@ -41,6 +43,8 @@ void LogErr(char *format, ...) {
 	va_list args;
 	FILE *file;
 	char *error;
+
+	LogCount++;
 
 	error = "ERROR: ";
 	char errorMessage[strlen(error) + strlen(format) + 1];
@@ -65,9 +69,9 @@ void LogErr(char *format, ...) {
 		}
 	} else {
 		vfprintf(file, errorMessage, args);
-		fclose(file);
 	}
 
 	if(file) fclose(file);
+
 	va_end(args);
 }

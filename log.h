@@ -6,6 +6,9 @@
 // keeps track of whether the log file is created or not
 extern int LogCreated;
 
+// keeps track of the number of errors
+extern int LogCount;
+
 /**
  ** logs a message to LOGFILE
  ** param format: format of message

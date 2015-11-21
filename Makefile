@@ -72,3 +72,10 @@ clean:
 reset:
 	make uninstall
 	make clean
+
+
+##
+# Testing
+##
+
+testreset: reset all default
